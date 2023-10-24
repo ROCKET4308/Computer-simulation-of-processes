@@ -7,7 +7,7 @@ class Pizzeria:
         self.standard_pizza_time = 10
         self.custom_pizza_time = 15
         self.standard_pizza_price = np.random.randint(10, 15)
-        self.custom_pizza_price = np.random.randint(15, 30)
+        self.custom_pizza_price = np.random.randint(15, 20)
 
     def display_orders(self, orders_df):
         print("Замовлення на піцу:")
@@ -47,7 +47,7 @@ def simulate_orders(pizzeria):
         if interval:
             num_orders = rs.binomial(1, probabilities[i])
             for _ in range(num_orders):
-                if rs.random() < 0.7:
+                if rs.random() < 0.5:
                     order_type = "Standard"
                     order_time_minutes = pizzeria.standard_pizza_time
                     order_price = pizzeria.standard_pizza_price
