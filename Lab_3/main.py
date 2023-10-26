@@ -72,7 +72,7 @@ orders_df = simulate_orders(pizzeria)
 
 pizzeria.display_orders(orders_df)
 
-# TODO:
+
 orders_per_hour = orders_df.groupby(orders_df['Time'] // 60).size()
 
 
