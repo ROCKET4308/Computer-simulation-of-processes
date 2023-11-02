@@ -1,6 +1,6 @@
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
+
 
 class Pizzeria:
     def __init__(self):
@@ -12,32 +12,17 @@ class Pizzeria:
         self.standard_pizza_price = np.random.randint(10, 15)
         self.custom_pizza_price = np.random.randint(15, 30)
         self.queue = []
-
-    def display_orders(self, queue, start_time_minutes):
-        hours = start_time_minutes // 60
-        minutes = start_time_minutes % 60
-        print("-" * 50)
-        print(f"Замовлення на піцу в {hours:02}:{minutes:02}:")
-        for index, row in queue.iterrows():
-            print()
-            hours_order = row['Order Time'] // 60
-            minutes_order = row['Order Time'] % 60
-            pizza_time_minutes = row['Pizza Time']
-            print(f"Час замовлення:  {hours_order:02}:{minutes_order:02}")
-            print(f"Тип замовлення: {row['Pizza Type']}")
-            print(f"Час виготовлення: {pizza_time_minutes:02} хвилин")
-            print(f"Вартість: {row['Pizza Price']} умовних одиниць")
-        print("-" * 50)
+        self.ovens_list = []
 
     def simulate(self):
-        simulation_duration_minutes = 1320
+        simulation_duration_minutes = 1325
         time_interval_minutes = 5
         np.random.seed(0)
         rs = np.random.RandomState(0)
 
         order_statistics = [0] * 24
         hourly_profit = [0] * 24
-        busy_ovens = 0
+
 
         intervals = [(540, 660), (660, 900), (900, 1200), (1200, 1320)]
         probabilities = [0.3, 0.5, 0.9, 0.7]
@@ -65,61 +50,39 @@ class Pizzeria:
                         pizza_time = self.custom_pizza_time
                         pizza_price = self.custom_pizza_price
 
-                    if len(self.queue) < self.max_queue_length:
+                    if len(self.ovens_list) < self.num_ovens:
+                        self.ovens_list.append({
+                            "Order Time": start_time_minutes,
+                            "Pizza Type": pizza_type,
+                            "Pizza Time": pizza_time,
+                            "Pizza Price": pizza_price,
+                        })
+                        hourly_revenue += pizza_price
+
+                    elif len(self.queue) < self.max_queue_length:
                         self.queue.append({
                             "Order Time": start_time_minutes,
                             "Pizza Type": pizza_type,
                             "Pizza Time": pizza_time,
                             "Pizza Price": pizza_price,
                         })
-                        busy_ovens += 1
-                        hourly_revenue += pizza_price
 
-            orders_to_remove = []
+            for oven in self.ovens_list:
+                if start_time_minutes >= oven["Order Time"] + oven["Pizza Time"]:
+                    self.ovens_list.remove(oven)
+
             for order in self.queue:
-                order_start_time = order["Order Time"]
-                pizza_time = order["Pizza Time"]
-                if start_time_minutes >= order_start_time + pizza_time:
-                    orders_to_remove.append(order)
-
-            for order in orders_to_remove:
-                self.queue.remove(order)
-                busy_ovens -= 1
+                if len(self.ovens_list) < self.num_ovens:
+                    self.ovens_list.append(order)
+                    hourly_revenue += order["Pizza Price"]
+                    self.queue.remove(order)
 
             current_hour = start_time_minutes // 60
             order_statistics[current_hour] += num_orders
             hourly_profit[current_hour] += hourly_revenue
 
-            orders_df = pd.DataFrame(self.queue)
-            self.display_orders(orders_df, start_time_minutes)
-
             start_time_minutes += time_interval_minutes
 
-        start_hour = 9
-        end_hour = 22
-        hours = range(start_hour, end_hour)  # Оновлені години
-
-        # Графік кількості замовлень
-        plt.figure(figsize=(12, 6))
-        plt.bar(hours, order_statistics[start_hour:end_hour], tick_label=hours, color='skyblue')
-        plt.xlabel('Година дня')
-        plt.ylabel('Кількість замовлень')
-        plt.title('Частота замовлень піц протягом дня')
-        plt.xticks(hours)
-        plt.grid(axis='y')
-        plt.show()
-
-        # Графік прибутку в кожну годину
-        plt.figure(figsize=(10, 6))
-        plt.bar(hours, hourly_profit[start_hour:end_hour], color='yellow')
-        plt.title('Прибуток піцерії в кожну годину')
-        plt.xlabel('Година')
-        plt.ylabel('Прибуток')
-        plt.xticks(hours)
-        plt.grid(axis='y')
-        plt.show()
 
 
-pizzeria = Pizzeria()
-pizzeria.simulate()
-
+Pizzeria().simulate()

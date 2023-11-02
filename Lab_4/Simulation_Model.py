@@ -146,6 +146,13 @@ class Pizzeria:
         plt.grid(axis='y')
         plt.show()
 
+        profit = 0
+        for prof in hourly_profit:
+            profit += prof
+        total_profit = profit - 10 * 20 * (22 - 9)
+        print(f"Profit without oven payments: {profit}")
+        print(f"Total profit: {total_profit}")
 
-pizzeria = Pizzeria()
-pizzeria.simulate()
+
+
+Pizzeria().simulate()
