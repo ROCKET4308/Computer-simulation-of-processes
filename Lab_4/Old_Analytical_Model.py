@@ -3,82 +3,85 @@ import numpy as np
 from prettytable import PrettyTable
 
 
-def simulate(num_ovens, interval):
-        intervals = [(540, 660), (660, 900), (900, 1200), (1200, 1320)]
-        probabilities = [0.3, 0.5, 0.9, 0.7]
-        max_queue_length = 10
-        oven_cost_per_hour = 20
-        standard_pizza_time = 10
-        custom_pizza_time = 15
-        standard_pizza_price = np.random.randint(10, 15)
-        custom_pizza_price = np.random.randint(15, 30)
-        queue = []
-        ovens_list = []
-        order_statistics = [0] * 24
-        hourly_profit = [0] * 24
-        interval_minute_start = interval * 60
-        interval_minute_end = interval * 60 + 60
+class Pizzeria:
+    def __init__(self):
+        self.max_queue_length = 10
+        self.num_ovens = 10
+        self.oven_cost_per_hour = 20
+        self.standard_pizza_time = 10
+        self.custom_pizza_time = 15
+        self.standard_pizza_price = np.random.randint(10, 15)
+        self.custom_pizza_price = np.random.randint(15, 30)
+        self.queue = []
+        self.ovens_list = []
+        self.intervals = [(540, 660), (660, 900), (900, 1200), (1200, 1320)]
+        self.probabilities = [0.3, 0.5, 0.9, 0.7]
+        self.order_statistics = [0] * 24
+        self.hourly_profit = [0] * 24
+
+    def simulate(self):
+        simulation_duration_minutes = 1320
         time_interval_minutes = 5
         np.random.seed(0)
         rs = np.random.RandomState(0)
 
-        while interval_minute_start < interval_minute_end:
+        start_time_minutes = 540
+
+        while start_time_minutes < simulation_duration_minutes:
             interval = None
-            for i, (start, end) in enumerate(intervals):
-                if start <= interval_minute_start < end:
-                    interval = intervals[i]
+            for i, (start, end) in enumerate(self.intervals):
+                if start <= start_time_minutes < end:
+                    interval = self.intervals[i]
                     break
 
             hourly_revenue = 0
 
             if interval:
-                num_orders = rs.binomial(1, probabilities[i])
+                num_orders = rs.binomial(1, self.probabilities[i])
                 for _ in range(num_orders):
                     if rs.random() < 0.7:
                         pizza_type = "Standard"
-                        pizza_time = standard_pizza_time
-                        pizza_price = standard_pizza_price
+                        pizza_time = self.standard_pizza_time
+                        pizza_price = self.standard_pizza_price
                     else:
                         pizza_type = "Custom"
-                        pizza_time = custom_pizza_time
-                        pizza_price = custom_pizza_price
+                        pizza_time = self.custom_pizza_time
+                        pizza_price = self.custom_pizza_price
 
-                    if len(ovens_list) < num_ovens:
-                        ovens_list.append({
-                            "Order Time": interval_minute_start,
+                    if len(self.ovens_list) < self.num_ovens:
+                        self.ovens_list.append({
+                            "Order Time": start_time_minutes,
                             "Pizza Type": pizza_type,
                             "Pizza Time": pizza_time,
                             "Pizza Price": pizza_price,
                         })
                         hourly_revenue += pizza_price
 
-                    elif len(queue) < max_queue_length:
-                        queue.append({
-                            "Order Time": interval_minute_start,
+                    elif len(self.queue) < self.max_queue_length:
+                        self.queue.append({
+                            "Order Time": start_time_minutes,
                             "Pizza Type": pizza_type,
                             "Pizza Time": pizza_time,
                             "Pizza Price": pizza_price,
                         })
 
-            for oven in ovens_list:
-                if interval_minute_start >= oven["Order Time"] + oven["Pizza Time"]:
-                    ovens_list.remove(oven)
+            for oven in self.ovens_list:
+                if start_time_minutes >= oven["Order Time"] + oven["Pizza Time"]:
+                    self.ovens_list.remove(oven)
 
-            for order in queue:
-                if len(ovens_list) < num_ovens:
-                    ovens_list.append(order)
+            for order in self.queue:
+                if len(self.ovens_list) < self.num_ovens:
+                    self.ovens_list.append(order)
                     hourly_revenue += order["Pizza Price"]
-                queue.remove(order)
+                self.queue.remove(order)
 
-            current_hour = interval_minute_start // 60
-            order_statistics[current_hour] += num_orders
-            hourly_profit[current_hour] += hourly_revenue
+            current_hour = start_time_minutes // 60
+            self.order_statistics[current_hour] += num_orders
+            self.hourly_profit[current_hour] += hourly_revenue
 
-            interval_minute_start += time_interval_minutes
+            start_time_minutes += time_interval_minutes
 
-        return order_statistics, hourly_profit
-
-def analytical():
+    def analytical(self):
         time_intervals = range(9, 22)
         oven_counts = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
@@ -96,7 +99,7 @@ def analytical():
                                    "Середній час перебування вимог у системі (Ws)", "Виручка (D)"]:
                 row_data = [characteristic]
                 for oven_count in oven_counts:
-                    q0, p_vidmovy, pq, Q, A, k_occupied, Lq, Ls, Wq, Ws, D, p, lambda_value, mu, t_service = calculate_system_characteristics_for_period(time_interval, oven_count)
+                    q0, p_vidmovy, pq, Q, A, k_occupied, Lq, Ls, Wq, Ws, D, p, lambda_value, mu, t_service = self.calculate_system_characteristics_for_period(time_interval, oven_count)
 
                     if characteristic == "Інтенсивність вхідного потоку (lambda)":
                         row_data.append(f"{lambda_value:.10f}")
@@ -135,11 +138,11 @@ def analytical():
             print(table)
             print("\n")
 
-def calculate_system_characteristics_for_period(time_interval, oven_count):
-        order_statistics, hourly_profit = simulate(oven_count, time_interval)
-        lambda_value = order_statistics[time_interval]
+    def calculate_system_characteristics_for_period(self, time_interval, oven_count):
 
-        t_service = 60 / order_statistics[time_interval]
+        lambda_value = self.order_statistics[time_interval]
+
+        t_service = 60 / self.order_statistics[time_interval]
         t_service = t_service / 60
 
         mu = 1 / t_service
@@ -180,13 +183,14 @@ def calculate_system_characteristics_for_period(time_interval, oven_count):
         Wq = Lq / lambda_value
         Ws = Ls / lambda_value
 
-        #profit = hourly_profit[time_interval]
+        profit = self.hourly_profit[time_interval]
 
-        D = 15.5 * A - 20 * c
+        D = profit - 20 * c
 
 
         return q0, p_vidmovy, pq, Q, A, k_occupied, Lq, Ls, Wq, Ws, D, p, lambda_value, mu, t_service
 
 
-if __name__ == '__main__':
-    analytical()
+pizzeria = Pizzeria()
+pizzeria.simulate()
+pizzeria.analytical()
