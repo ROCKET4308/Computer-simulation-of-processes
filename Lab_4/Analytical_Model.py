@@ -7,7 +7,6 @@ def simulate(num_ovens, interval):
         intervals = [(540, 660), (660, 900), (900, 1200), (1200, 1320)]
         probabilities = [0.3, 0.5, 0.9, 0.7]
         max_queue_length = 10
-        oven_cost_per_hour = 20
         standard_pizza_time = 10
         custom_pizza_time = 15
         standard_pizza_price = np.random.randint(10, 15)
@@ -80,7 +79,7 @@ def simulate(num_ovens, interval):
 
 def analytical():
         time_intervals = range(9, 22)
-        oven_counts = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        oven_counts = [2, 3, 4, 5, 6, 7, 8, 9, 10]
 
         for time_interval in time_intervals:
             table = PrettyTable()
@@ -139,8 +138,7 @@ def calculate_system_characteristics_for_period(time_interval, oven_count):
         order_statistics, hourly_profit = simulate(oven_count, time_interval)
         lambda_value = order_statistics[time_interval]
 
-        t_service = 60 / order_statistics[time_interval]
-        t_service = t_service / 60
+        t_service = 12 / 60
 
         mu = 1 / t_service
 
@@ -180,7 +178,7 @@ def calculate_system_characteristics_for_period(time_interval, oven_count):
         Wq = Lq / lambda_value
         Ws = Ls / lambda_value
 
-        #profit = hourly_profit[time_interval]
+        #hourly_profit[time_interval]
 
         D = 15.5 * A - 20 * c
 
