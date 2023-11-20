@@ -79,10 +79,5 @@ X_scaled = scaler.fit_transform(X)
 kmeans_scaled = KMeans(n_clusters=k_clusters, random_state=42, n_init=10)
 data['Cluster_Scaled'] = kmeans_scaled.fit_predict(X_scaled)
 
-
 print("\nComparison of Clustering Results:")
 print(data[['Cluster', 'Cluster_Scaled']].head(10))
-
-
-
-

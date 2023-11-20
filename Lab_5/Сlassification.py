@@ -53,25 +53,19 @@ plt.show()
 #Task 3 Навчіть класифікатор на тренувальному наборі даних. Застосуйте класифікатор до тестового набору даних.
 print()
 print("Task 3")
-# Розділення на вхідні та вихідні дані
-X = data.drop('Type', axis=1)  # Ознаки
-y = data['Type']  # Цільова змінна
+X = data.drop('Type', axis=1)
+y = data['Type']
 
-# Перетворення цільової змінної у числові мітки
 le = LabelEncoder()
 y = le.fit_transform(y)
 
-# Розділення на тренувальний та тестовий набори даних
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Ініціалізація та навчання класифікатора
 classifier = KNeighborsClassifier(n_neighbors=5)
 classifier.fit(X_train, y_train)
 
-# Прогнозування на тестових даних
 predictions = classifier.predict(X_test)
 
-# Оцінка точності моделі
 accuracy = accuracy_score(y_test, predictions)
 print(f'Точність класифікатору: {accuracy:.2f}')
 
@@ -81,7 +75,6 @@ print(f'Точність класифікатору: {accuracy:.2f}')
 #Task 4 Оцініть класифікатор
 print()
 print("Task 4")
-# Виведення звіту з класифікації
 print(classification_report(y_test, predictions))
 
 
@@ -102,19 +95,15 @@ plt.show()
 #Task 6 Виконайте масштабування (нормалізацію) функції та проаналізуйте, чи вплинуло це на продуктивність класифікатора.
 print()
 print("Task 6")
-#Стандартизація даних
 scaler = StandardScaler()
 X_train_standardized = scaler.fit_transform(X_train)
 X_test_standardized = scaler.transform(X_test)
 
-# Ініціалізація та навчання класифікатора k-найближчих сусідів на стандартизованих даних
 knn_classifier_standardized = KNeighborsClassifier(n_neighbors=3)
 knn_classifier_standardized.fit(X_train_standardized, y_train)
 
-# Прогнозування класів для стандартизованого тестового набору
 y_pred_knn_standardized = knn_classifier_standardized.predict(X_test_standardized)
 
-# Оцінка точності класифікатора k-найближчих сусідів на стандартизованих даних
 accuracy_standardized = accuracy_score(y_test, y_pred_knn_standardized)
 print(f"Точність класифікатора після нормалізації: {accuracy_standardized}")
 
@@ -124,7 +113,7 @@ print(f"Точність класифікатора після нормаліз�
 #Task 7 Підберіть параметри класифікатора, за якого найбільша часткаправильних передбачень серед тестових даних.
 print()
 print("Task 7")
-# Підготовка параметрів для перебору
+
 param_grid = {
  'n_neighbors': [2, 4, 8, 16, 32],
  'weights': ['uniform', 'distance'],
@@ -132,12 +121,10 @@ param_grid = {
  'leaf_size': [5, 10, 15, 20, 25, 30, 35, 40]
 }
 
-grid_search = GridSearchCV(KNeighborsClassifier(), param_grid, cv=5, scoring='accuracy', n_jobs=-1) # cv вказує кількість згорток у перехресній перевірці
+grid_search = GridSearchCV(KNeighborsClassifier(), param_grid, cv=5, scoring='accuracy', n_jobs=-1)
 
-# Навчання класифікатора з використанням перехресної перевірки та пошук оптимальних параметрів
 grid_search.fit(X_train_standardized, y_train)
 
-# Виведення найкращих параметрів та їх впливу на точність
 print(f"Найкращі параметри: {grid_search.best_params_}")
 print(f"Найкраща точність: {grid_search.best_score_}")
 
@@ -147,17 +134,15 @@ print(f"Найкраща точність: {grid_search.best_score_}")
 #Task 9 Напишіть власну функцію, яка розраховує евклідову відстань між двома об’єктами.
 print()
 print("Task 9")
-# Функція для розрахунку евклідової відстані
+
 def euclidean_distance(instance1, instance2):
     return np.linalg.norm(instance1 - instance2)
 
-# Вибір по три об'єкти з кожного класу тестового набору
 class_1 = X_test[y_test == 1].head(3)
 class_2 = X_test[y_test == 2].head(3)
 class_3 = X_test[y_test == 3].head(3)
 class_5 = X_test[y_test == 5].head(3)
 
-# Знаходимо найближчого сусіда з навчального набору для кожного об'єкта
 nearest_neighbors_class_1 = [X_train.iloc[np.argmin([euclidean_distance(class_1.iloc[i], x) for _, x in X_train.iterrows()])] for i in range(3)]
 nearest_neighbors_class_2 = [X_train.iloc[np.argmin([euclidean_distance(class_2.iloc[i], x) for _, x in X_train.iterrows()])] for i in range(3)]
 nearest_neighbors_class_3 = [X_train.iloc[np.argmin([euclidean_distance(class_3.iloc[i], x) for _, x in X_train.iterrows()])] for i in range(3)]
