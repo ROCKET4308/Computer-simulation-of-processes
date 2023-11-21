@@ -56,8 +56,7 @@ print("Task 3")
 X = data.drop('Type', axis=1)
 y = data['Type']
 
-le = LabelEncoder()
-y = le.fit_transform(y)
+
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
@@ -83,7 +82,7 @@ print(classification_report(y_test, predictions))
 #Task 5 Побудуйте матрицю неточностей.
 confusion_mat = confusion_matrix(y_test, predictions)
 plt.figure(figsize=(8, 6))
-sns.heatmap(confusion_mat, annot=True, fmt='d', cmap='Blues', xticklabels=range(1, 7), yticklabels=range(1, 7))
+sns.heatmap(confusion_mat, annot=True, fmt='d', cmap='Blues', xticklabels=classifier.classes_, yticklabels=classifier.classes_)
 plt.xlabel('Предсказані класи')
 plt.ylabel('Справжні класи')
 plt.title('Матриця неточностей')

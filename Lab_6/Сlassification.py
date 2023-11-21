@@ -5,26 +5,30 @@ import seaborn as sns
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import silhouette_score, davies_bouldin_score, calinski_harabasz_score
 
+
 file_path = 'Glass.csv'
 data = pd.read_csv(file_path)
-
-X = data.drop(columns=['Type'])
+features = data.drop(columns=['Type'])
 
 # Task 2
 k_clusters = len(data['Type'].unique())
 kmeans = KMeans(n_clusters=k_clusters, random_state=42, n_init=10)
-data['Cluster'] = kmeans.fit_predict(X)
+features['Cluster'] = kmeans.fit_predict(features)
+
+cluster_stats = features.groupby('Cluster').describe().transpose()
+print(cluster_stats)
+
 
 # Task 3: Visualize clustering results
-sns.pairplot(data=data, hue='Cluster', palette='Dark2')
+sns.pairplot(data=features, hue='Cluster', palette='Dark2')
 plt.show()
 
 # Task 4
-instances_per_cluster = data['Cluster'].value_counts()
+instances_per_cluster = features['Cluster'].value_counts()
 print("Instances per cluster:")
 print(instances_per_cluster)
 
-cluster_class_distribution = data.groupby(['Cluster', 'Type']).size().unstack(fill_value=0)
+cluster_class_distribution = pd.crosstab(data['Type'], features['Cluster'])
 print("\nClass distribution in each cluster:")
 print(cluster_class_distribution)
 
@@ -35,11 +39,11 @@ calinski_harabasz_scores = []
 
 for n_clusters in range(2, 11):
     kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
-    labels = kmeans.fit_predict(X)
+    labels = kmeans.fit_predict(features)
 
-    silhouette_scores.append(silhouette_score(X, labels))
-    davies_bouldin_scores.append(davies_bouldin_score(X, labels))
-    calinski_harabasz_scores.append(calinski_harabasz_score(X, labels))
+    silhouette_scores.append(silhouette_score(features, labels))
+    davies_bouldin_scores.append(davies_bouldin_score(features, labels))
+    calinski_harabasz_scores.append(calinski_harabasz_score(features, labels))
 
 cluster_metrics = pd.DataFrame({
     'Number of Clusters': range(2, 11),
@@ -60,24 +64,68 @@ plt.figure(figsize=(12, 6))
 plt.subplot(1, 3, 1)
 plt.plot(range(2, 11), silhouette_scores, marker='o')
 plt.title('Silhouette Score')
+plt.xlabel('Number of Clusters')
 
 plt.subplot(1, 3, 2)
 plt.plot(range(2, 11), davies_bouldin_scores, marker='o')
 plt.title('Davies-Bouldin Score')
+plt.xlabel('Number of Clusters')
 
 plt.subplot(1, 3, 3)
 plt.plot(range(2, 11), calinski_harabasz_scores, marker='o')
 plt.title('Calinski-Harabasz Score')
+plt.xlabel('Number of Clusters')
 
 plt.tight_layout()
 plt.show()
 
 # Task 6
+silhouette_scores = []
+davies_bouldin_scores = []
+calinski_harabasz_scores = []
+
 scaler = StandardScaler()
-X_scaled = scaler.fit_transform(X)
+features_scaled = scaler.fit_transform(features)
 
-kmeans_scaled = KMeans(n_clusters=k_clusters, random_state=42, n_init=10)
-data['Cluster_Scaled'] = kmeans_scaled.fit_predict(X_scaled)
+for n_clusters in range(2, 11):
+    kmeans_normalized = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
+    kmeans_normalized.fit(features_scaled)
+    labels = kmeans_normalized.labels_
 
-print("\nComparison of Clustering Results:")
-print(data[['Cluster', 'Cluster_Scaled']].head(10))
+    silhouette_scores.append(silhouette_score(features, labels))
+    davies_bouldin_scores.append(davies_bouldin_score(features, labels))
+    calinski_harabasz_scores.append(calinski_harabasz_score(features, labels))
+
+cluster_metrics = pd.DataFrame({
+    'Number of Clusters': range(2, 11),
+    'Silhouette Score': silhouette_scores,
+    'Davies-Bouldin Score': davies_bouldin_scores,
+    'Calinski-Harabasz Score': calinski_harabasz_scores
+})
+
+pd.set_option('display.max_rows', None)
+pd.set_option('display.max_columns', None)
+pd.set_option('display.width', None)
+pd.set_option('display.max_colwidth', None)
+
+print("\nCluster Normalized Metrics:")
+print(cluster_metrics.to_string(index=False))
+
+plt.figure(figsize=(12, 6))
+plt.subplot(1, 3, 1)
+plt.plot(range(2, 11), silhouette_scores, marker='o')
+plt.title('Silhouette Score')
+plt.xlabel('Number of Clusters')
+
+plt.subplot(1, 3, 2)
+plt.plot(range(2, 11), davies_bouldin_scores, marker='o')
+plt.title('Davies-Bouldin Score')
+plt.xlabel('Number of Clusters')
+
+plt.subplot(1, 3, 3)
+plt.plot(range(2, 11), calinski_harabasz_scores, marker='o')
+plt.title('Calinski-Harabasz Score')
+plt.xlabel('Number of Clusters')
+
+plt.tight_layout()
+plt.show()
