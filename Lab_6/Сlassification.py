@@ -19,8 +19,23 @@ cluster_stats = features.groupby('Cluster').describe().transpose()
 print(cluster_stats)
 
 
-# Task 3: Visualize clustering results
-sns.pairplot(data=features, hue='Cluster', palette='Dark2')
+# Task 3
+# Вибірка параметрів для побудови графіків
+selected_features = ["RI", "Na", "Mg", "Al"]
+
+# Побудова графіків попарно
+plt.figure(figsize=(15, 10))
+
+for i in range(len(selected_features)):
+    for j in range(len(selected_features)):
+        plt.subplot(len(selected_features), len(selected_features), i * len(selected_features) + j + 1)
+        sns.scatterplot(data=features, x=selected_features[i], y=selected_features[j], hue='Cluster', palette='viridis', s=50)
+        plt.scatter(kmeans.cluster_centers_[:, i], kmeans.cluster_centers_[:, j], marker='x', s=200, linewidths=3, color='red')
+        plt.title(f'{selected_features[i]} vs {selected_features[j]}')
+        plt.xlabel(selected_features[i])
+        plt.ylabel(selected_features[j])
+
+plt.tight_layout()
 plt.show()
 
 # Task 4
