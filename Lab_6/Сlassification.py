@@ -1,7 +1,6 @@
 import pandas as pd
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
-import seaborn as sns
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import silhouette_score, davies_bouldin_score, calinski_harabasz_score
 
@@ -21,22 +20,22 @@ print(cluster_stats)
 
 # Task 3
 # Вибірка параметрів для побудови графіків
-selected_features = ["RI", "Na", "Mg", "Al"]
+def plot_clusters(feature1, feature2):
+    plt.figure(figsize=(8, 6))
+    plt.scatter(features[feature1], features[feature2], c=features["Cluster"], cmap="viridis", alpha=0.7)
+    plt.scatter(kmeans.cluster_centers_[:, features.columns.get_loc(feature1)],
+                kmeans.cluster_centers_[:, features.columns.get_loc(feature2)],
+                marker='X', s=200, c='red', label='Centroids')
+    plt.title(f"Clustering based on {feature1} and {feature2}")
+    plt.xlabel(feature1)
+    plt.ylabel(feature2)
+    plt.legend()
+    plt.show()
 
-# Побудова графіків попарно
-plt.figure(figsize=(15, 10))
-
-for i in range(len(selected_features)):
-    for j in range(len(selected_features)):
-        plt.subplot(len(selected_features), len(selected_features), i * len(selected_features) + j + 1)
-        sns.scatterplot(data=features, x=selected_features[i], y=selected_features[j], hue='Cluster', palette='viridis', s=50)
-        plt.scatter(kmeans.cluster_centers_[:, i], kmeans.cluster_centers_[:, j], marker='x', s=200, linewidths=3, color='red')
-        plt.title(f'{selected_features[i]} vs {selected_features[j]}')
-        plt.xlabel(selected_features[i])
-        plt.ylabel(selected_features[j])
-
-plt.tight_layout()
-plt.show()
+plot_clusters("Ca", "Na")
+plot_clusters("Mg", "Al")
+plot_clusters("Fe", "RI")
+plot_clusters("K", "Ba")
 
 # Task 4
 instances_per_cluster = features['Cluster'].value_counts()

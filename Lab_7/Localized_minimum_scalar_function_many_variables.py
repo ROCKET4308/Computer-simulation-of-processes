@@ -1,22 +1,20 @@
-from scipy.optimize import minimize
+from scipy.optimize import minimize, differential_evolution
 import matplotlib.pyplot as plt
 import numpy as np
 
 def scalar_function(x):
-    return (x[0] - 3) ** 2 + (x[1] - 4) ** 2 + x[0] * x[1]
+    return (x[0] - 6) ** 2 + (x[1] - 4) ** 2 + x[0] * x[1]
 
-bounds = [(-10, 10), (-10, 10)]
+result = minimize(scalar_function, x0=[0, 0])
+min_x, min_y = result.x
+min_z = result.fun
+print(f"Мінімум функції: x = {min_x}, y = {min_y}, f(x, y) = {min_z}")
 
-initial_guess = [0, 0]
-
-result = minimize(scalar_function, initial_guess, bounds=bounds, method='L-BFGS-B')
-
-print("Мінімум:", result.x)
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
-x = np.linspace(-10, 10, 100)
-y = np.linspace(-10, 10, 100)
+x = np.linspace(-50, 50, 100)
+y = np.linspace(-50, 50, 100)
 X, Y = np.meshgrid(x, y)
 Z = scalar_function([X, Y])
 ax.plot_surface(X, Y, Z, cmap='viridis', alpha=0.7)
@@ -29,8 +27,33 @@ ax.legend()
 plt.show()
 
 
-plt.contourf(X, Y, Z, levels=50, cmap='viridis')
-plt.colorbar()
-plt.scatter(result.x[0], result.x[1], color='red', label='Мінімум')
+plt.figure(figsize=(16, 5))
+plt.subplot(131)
+contour_yoz = plt.contour(Y, Z, X, levels=20, cmap='viridis')
+plt.scatter(min_y, min_z, color='red', marker='o', label='Minimum')
+plt.title('Contour Plot YOZ')
+plt.xlabel('y')
+plt.ylabel('f(x, y)')
+plt.colorbar(contour_yoz)
+plt.legend()
+
+plt.subplot(132)
+contour_xoy = plt.contour(X, Y, Z, levels=20, cmap='viridis')
+plt.scatter(min_x, min_y, color='red', marker='o', label='Minimum')
+plt.title('Contour Plot XOY')
+plt.xlabel('x')
+plt.ylabel('y')
+plt.colorbar(contour_xoy)
+plt.legend()
+
+plt.subplot(133)
+contour_xoz = plt.contour(X, Z, Y, levels=20, cmap='viridis')
+plt.scatter(min_x, min_z, color='red', marker='o', label='Minimum')
+plt.title('Contour Plot XOZ')
+plt.xlabel('x')
+plt.ylabel('f(x, y)')
+plt.colorbar(contour_xoz)
 plt.legend()
 plt.show()
+
+
